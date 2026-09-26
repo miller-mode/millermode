@@ -101,7 +101,6 @@ export class Gallery {
   private pointer = {
     down: false,
     dragging: true,
-    type: "drag" as "drag" | "scroll",
     start: { x: 0, y: 0 },
     friction: 0.2 + 0.05 * Math.random(),
     easing: 0.2 + 0.065 * Math.random(),
@@ -203,7 +202,6 @@ export class Gallery {
         scene: this.scene,
         project: this.projects[projectIndex],
         cover: this.covers[projectIndex],
-        isMobile: this.isMobile,
       });
       if (!this.isMobile) tile.loadHover();
       this.tiles.push(tile);
@@ -305,7 +303,6 @@ export class Gallery {
     this.pointer.x.target += SCROLL_MULTIPLIER * event.deltaX;
     this.pointer.y.target += SCROLL_MULTIPLIER * event.deltaY;
     this.pointer.dragging = true;
-    this.pointer.type = "scroll";
     this.releaseDrag();
   }
 
@@ -314,12 +311,10 @@ export class Gallery {
     const { clientX, clientY } = "touches" in event ? event.touches[0] : event;
     this.pointer.down = true;
     this.pointer.start = { x: clientX, y: clientY };
-    this.pointer.type = "drag";
   }
 
   private onPointerUp() {
     this.pointer.down = false;
-    this.pointer.type = "drag";
     this.releaseDrag();
   }
 
@@ -328,7 +323,6 @@ export class Gallery {
     const { clientX, clientY } = "touches" in event ? event.touches[0] : event;
 
     if (!this.pointer.down) this.updateHits(clientX, clientY);
-    this.pointer.type = "drag";
 
     if (this.pointer.down) {
       this.pointer.dragging = true;
@@ -376,7 +370,6 @@ export class Gallery {
         horizontal: axisDirection(this.pointer.x.delta),
         vertical: axisDirection(this.pointer.y.delta),
       },
-      type: this.pointer.type,
     };
 
     this.tiles.forEach((tile) => tile.move(motion));

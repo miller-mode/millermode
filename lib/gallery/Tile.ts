@@ -9,7 +9,6 @@ export type Motion = {
   x: number;
   y: number;
   direction: { horizontal: number; vertical: number };
-  type: "drag" | "scroll";
 };
 
 type TileOptions = {
@@ -18,7 +17,6 @@ type TileOptions = {
   scene: Transform;
   project: Project;
   cover: HTMLImageElement;
-  isMobile: boolean;
 };
 
 type Layout = {
@@ -29,7 +27,6 @@ type Layout = {
   padding: number;
 };
 
-const DRAG_DISTORTION = 1.5;
 const REVEAL_START_SCALE = 0.82;
 const HOVER_DELAY = 50;
 
@@ -44,8 +41,6 @@ export class Tile {
   private container = new Transform();
   private program: Program;
   private ratio: number;
-  private force: number;
-  private exponent: number;
   private hoverReady = false;
   private hoverTimeout = 0;
 
@@ -61,12 +56,10 @@ export class Tile {
   private oldX = 0;
   private oldY = 0;
 
-  constructor({ gl, geometry, scene, project, cover, isMobile }: TileOptions) {
+  constructor({ gl, geometry, scene, project, cover }: TileOptions) {
     this.gl = gl;
     this.project = project;
     this.ratio = cover.naturalHeight / cover.naturalWidth;
-    this.force = isMobile ? 0.02 : 0.01;
-    this.exponent = isMobile ? 1.5 : 3;
 
     const coverTexture = new Texture(gl, { image: cover, generateMipmaps: false });
     const coverSize = [cover.naturalWidth, cover.naturalHeight];
@@ -81,9 +74,6 @@ export class Tile {
         uImageSizes: { value: coverSize },
         uHoverSizes: { value: coverSize },
         uPlaneSizes: { value: [0, 0] },
-        uViewportSizes: { value: [0, 0] },
-        uStrength: { value: 0 },
-        uTime: { value: 0 },
         uProgress: { value: 0 },
         uReveal: { value: 0 },
       },
@@ -134,7 +124,6 @@ export class Tile {
     this.mesh.scale.y = this.mesh.scale.x * this.ratio;
 
     this.program.uniforms.uPlaneSizes.value = [this.mesh.scale.x, this.mesh.scale.y];
-    this.program.uniforms.uViewportSizes.value = [viewport.width, viewport.height];
 
     this.place();
   }
@@ -143,7 +132,7 @@ export class Tile {
     this.limits = limits;
   }
 
-  move({ x, y, direction, type }: Motion) {
+  move({ x, y, direction }: Motion) {
     let deltaX = x - this.oldX;
     let deltaY = y - this.oldY;
 
@@ -155,9 +144,6 @@ export class Tile {
     this.oldX = x;
     this.oldY = y;
     this.place();
-
-    const factor = type === "drag" ? DRAG_DISTORTION : 1;
-    this.distort(deltaX * factor, deltaY * factor);
   }
 
   enter() {
@@ -193,12 +179,5 @@ export class Tile {
     this.program.uniforms.uReveal.value = this.reveal.value;
     this.container.position.x = this.mesh.scale.x / 2 + ((this.left + this.x) / this.screen.width) * this.viewport.width;
     this.container.position.y = -this.mesh.scale.y / 2 - ((this.top + this.y) / this.screen.height) * this.viewport.height;
-  }
-
-  private distort(deltaX: number, deltaY: number) {
-    const vertical = Math.pow(Math.abs(deltaY * this.force), this.exponent);
-    const horizontal = Math.pow(Math.abs(deltaX * this.force), this.exponent);
-    this.program.uniforms.uStrength.value = Math.max(-Math.max(horizontal, vertical), -this.exponent);
-    this.program.uniforms.uTime.value += 0.08;
   }
 }
