@@ -305,9 +305,67 @@ a:focus-visible {
   display: block;
 }
 
+.a-cursor__dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.8rem;
+  height: auto;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.25s var(--ease-back);
+}
+
+.a-cursor.-home.-hover .a-cursor__dot {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.a-cursor.-hover .a-cursor__label {
+  top: 12px;
+  left: 20px;
+  color: var(--color-red);
+  font-family: var(--font-hand), cursive;
+  font-size: 2.6rem;
+  line-height: 1;
+  transform: rotate(-3deg);
+  transform-origin: left center;
+}
+
+.a-hoverFrame {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 4;
+  overflow: visible;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.a-hoverFrame.-inline {
+  position: absolute;
+  z-index: 1;
+}
+
+.a-hoverFrame.-inline path {
+  stroke-width: 2.5;
+}
+
+.a-hoverFrame path {
+  fill: none;
+  stroke: var(--color-red);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
 @media only screen and (min-width: 768px) {
   .a-cursor {
     display: block;
+  }
+
+  .o-gallery.-hovering .a-galleryCanvas {
+    cursor: none;
   }
 }
 
@@ -671,20 +729,11 @@ a:focus-visible {
   height: auto;
   max-height: 100%;
   margin: auto;
-  outline: 2px solid transparent;
-  outline-offset: 0.4rem;
-  transition: outline-color 0.3s ease-in-out;
 }
 
 .m-project__frameNumber {
   font-size: 1.8rem;
   transition: color 0.3s ease-in-out;
-}
-
-.m-project__frame:hover .m-project__thumb,
-.m-project__frame:focus-visible .m-project__thumb,
-.m-project__frame.-current .m-project__thumb {
-  outline-color: var(--color-red);
 }
 
 .m-project__frame:hover .m-project__frameNumber,

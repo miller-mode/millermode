@@ -6,7 +6,9 @@ import Image from "next/image";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useMountEffect } from "@/hooks/useMountEffect";
+import { drawFrame, hideFrame } from "@/lib/hoverFrame";
 import type { Project } from "@/lib/projects";
+import { HoverFrame } from "./HoverFrame";
 
 gsap.registerPlugin(useGSAP);
 
@@ -31,6 +33,7 @@ export function ProjectView({ project, onClose }: ProjectViewProps) {
   const track = useRef<HTMLDivElement>(null);
   const sheetButton = useRef<HTMLButtonElement>(null);
   const scrollTarget = useRef(0);
+  const marks = useRef<(SVGSVGElement | null)[]>([]);
   const [current, setCurrent] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -88,6 +91,31 @@ export function ProjectView({ project, onClose }: ProjectViewProps) {
     setCurrent(distances.indexOf(Math.min(...distances)));
   }
 
+  function markFrame(index: number) {
+    const mark = marks.current[index];
+    const wrap = mark?.parentElement;
+    const thumb = wrap?.querySelector("img");
+    if (!mark || !wrap || !thumb) return;
+    const bounds = wrap.getBoundingClientRect();
+    const box = thumb.getBoundingClientRect();
+    drawFrame(mark, { x: box.left - bounds.left, y: box.top - bounds.top, width: box.width, height: box.height });
+  }
+
+  function unmarkFrame(index: number) {
+    const mark = marks.current[index];
+    if (mark && index !== current) hideFrame(mark);
+  }
+
+  function toggleSheet() {
+    if (sheetOpen) {
+      setSheetOpen(false);
+      return;
+    }
+    marks.current.forEach((mark) => mark && hideFrame(mark));
+    setSheetOpen(true);
+    window.requestAnimationFrame(() => markFrame(current));
+  }
+
   function openFrame(index: number) {
     centerOn(index, 0);
     setCurrent(index);
@@ -137,10 +165,20 @@ export function ProjectView({ project, onClose }: ProjectViewProps) {
                 type="button"
                 className={`m-project__frame${index === current ? " -current" : ""}`}
                 onClick={() => openFrame(index)}
+                onMouseEnter={() => markFrame(index)}
+                onMouseLeave={() => unmarkFrame(index)}
+                onFocus={() => markFrame(index)}
+                onBlur={() => unmarkFrame(index)}
                 aria-label={`Show image ${index + 1}`}
               >
                 <span className="m-project__thumbWrap">
                   <Image className="m-project__thumb" src={image.src} alt="" width={image.width} height={image.height} loading="lazy" />
+                  <HoverFrame
+                    ref={(mark) => {
+                      marks.current[index] = mark;
+                    }}
+                    className="-inline"
+                  />
                 </span>
                 <span className="a-hand m-project__frameNumber">{pad(index + 1)}</span>
               </button>
@@ -168,7 +206,7 @@ export function ProjectView({ project, onClose }: ProjectViewProps) {
             ref={sheetButton}
             type="button"
             className="a-p m-project__action"
-            onClick={() => setSheetOpen(!sheetOpen)}
+            onClick={toggleSheet}
             aria-pressed={sheetOpen}
           >
             {sheetOpen ? "Filmstrip" : "Contact sheet"}

@@ -168,9 +168,9 @@ export function Menu({ open }: MenuProps) {
 
         <footer className="o-menu__footer o-menu__reveal">
           <p className="o-menu__signature">
-            <Doodle name="xxx" className="o-menu__signatureDoodle" />
-            <Doodle name="comma" className="o-menu__signatureComma" />
             <Doodle name="monogram" className="o-menu__signatureDoodle" />
+            <Doodle name="comma" className="o-menu__signatureComma" />
+            <Doodle name="xxx" className="o-menu__signatureDoodle" />
           </p>
           <a className="a-label o-menu__email" href={`mailto:${site.email}`}>
             {site.email}

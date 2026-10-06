@@ -88,6 +88,10 @@ export class Tile {
     return this.height;
   }
 
+  get screenRect() {
+    return { x: this.left + this.x, y: this.top + this.y, width: this.width, height: this.height };
+  }
+
   get screenCenter() {
     return {
       x: this.left + this.x + this.width / 2,

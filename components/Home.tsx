@@ -2,10 +2,14 @@
 
 import { useRef, useState } from "react";
 import { useMountEffect } from "@/hooks/useMountEffect";
-import { Gallery, IDLE_LABEL } from "@/lib/gallery/Gallery";
+import { Gallery } from "@/lib/gallery/Gallery";
+import type { HoverTarget } from "@/lib/gallery/Gallery";
+import { drawFrame, hideFrame, moveFrame } from "@/lib/hoverFrame";
 import type { Project } from "@/lib/projects";
 import { Cursor } from "./Cursor";
+import type { CursorHandle } from "./Cursor";
 import { Header } from "./Header";
+import { HoverFrame } from "./HoverFrame";
 import { Loader } from "./Loader";
 import { Menu } from "./Menu";
 import { ProjectView } from "./ProjectView";
@@ -16,7 +20,8 @@ export function Home({ projects }: { projects: Project[] }) {
   const galleryContainer = useRef<HTMLDivElement>(null);
   const loadProgress = useRef(0);
   const galleryReady = useRef(false);
-  const cursorLabel = useRef<HTMLParagraphElement>(null);
+  const cursor = useRef<CursorHandle>(null);
+  const hoverFrame = useRef<SVGSVGElement>(null);
   const gallery = useRef<Gallery | null>(null);
 
   const [revealed, setRevealed] = useState(false);
@@ -29,6 +34,14 @@ export function Home({ projects }: { projects: Project[] }) {
     setRevealed(true);
     document.documentElement.classList.add("-initialized");
     gallery.current?.start();
+  }
+
+  function showHover(target: HoverTarget | null) {
+    cursor.current?.setHover(target?.project.title ?? null);
+    galleryContainer.current?.classList.toggle("-hovering", target !== null);
+    if (!hoverFrame.current) return;
+    if (target) drawFrame(hoverFrame.current, target.rect);
+    else hideFrame(hoverFrame.current);
   }
 
   function pauseGallery() {
@@ -78,8 +91,9 @@ export function Home({ projects }: { projects: Project[] }) {
       onReady: () => {
         galleryReady.current = true;
       },
-      onLabel: (label) => {
-        if (cursorLabel.current) cursorLabel.current.textContent = label;
+      onHover: showHover,
+      onHoverMove: (rect) => {
+        if (hoverFrame.current) moveFrame(hoverFrame.current, rect);
       },
       onSelect: openProject,
     });
@@ -99,9 +113,10 @@ export function Home({ projects }: { projects: Project[] }) {
         <Header menuOpen={menuOpen} onLogo={goHome} onToggle={toggleMenu} />
         <Menu open={menuOpen} />
         <div ref={galleryContainer} className="o-gallery" aria-label="Projects gallery" role="region" />
+        <HoverFrame ref={hoverFrame} />
         {project && <ProjectView key={project.slug} project={project} onClose={closeProject} />}
       </main>
-      <Cursor home={isHome} labelRef={cursorLabel} label={IDLE_LABEL} />
+      <Cursor ref={cursor} home={isHome} />
     </>
   );
 }

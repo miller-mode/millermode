@@ -1,6 +1,7 @@
 export const doodles = {
   comma: { src: "/doodles/comma.svg", width: 108, height: 138 },
   devil: { src: "/doodles/devil.svg", width: 353, height: 576 },
+  dot: { src: "/doodles/dot.svg", width: 28, height: 28 },
   hearts: { src: "/doodles/hearts.svg", width: 629, height: 671 },
   monogram: { src: "/doodles/monogram.svg", width: 693, height: 528 },
   plus: { src: "/doodles/plus.svg", width: 296, height: 281 },

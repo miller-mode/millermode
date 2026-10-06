@@ -7,16 +7,19 @@ import type { Project } from "@/lib/projects";
 import { Tile } from "./Tile";
 import type { Size } from "./Tile";
 
+export type ScreenRect = { x: number; y: number; width: number; height: number };
+
+export type HoverTarget = { project: Project; rect: ScreenRect };
+
 export type GalleryEvents = {
   onProgress: (percent: number) => void;
   onReady: () => void;
-  onLabel: (label: string) => void;
+  onHover: (target: HoverTarget | null) => void;
+  onHoverMove: (rect: ScreenRect) => void;
   onSelect: (project: Project) => void;
 };
 
 type Axis = { delta: number; target: number; position: number; velocity: number };
-
-export const IDLE_LABEL = "Scroll or drag";
 
 const MIN_COLUMNS = 8;
 const COVERAGE_WIDTH = 1.75;
@@ -86,6 +89,7 @@ export class Gallery {
   private tiles: Tile[] = [];
   private covers: HTMLImageElement[] = [];
   private hits: Mesh[] = [];
+  private hovered: Tile | null = null;
 
   private screen: Size = { width: 0, height: 0 };
   private viewport: Size = { width: 0, height: 0 };
@@ -148,8 +152,7 @@ export class Gallery {
     this.active = active;
     if (active) return;
     this.hits = [];
-    this.tiles.forEach((tile) => tile.leave());
-    this.events.onLabel(IDLE_LABEL);
+    this.clearHover();
   }
 
   setVisible(visible: boolean) {
@@ -319,7 +322,11 @@ export class Gallery {
   }
 
   private onPointerMove(event: MouseEvent | TouchEvent) {
-    if (!this.active || event.target !== this.gl.canvas) return;
+    if (!this.active) return;
+    if (event.target !== this.gl.canvas) {
+      this.clearHover();
+      return;
+    }
     const { clientX, clientY } = "touches" in event ? event.touches[0] : event;
 
     if (!this.pointer.down) this.updateHits(clientX, clientY);
@@ -340,9 +347,18 @@ export class Gallery {
 
     if (window.innerWidth <= MOBILE_BREAKPOINT) return;
 
-    const hovered = this.tiles.find((tile) => tile.mesh === this.hits[0]);
+    this.setHovered(this.tiles.find((tile) => tile.mesh === this.hits[0]) ?? null);
+  }
+
+  private setHovered(hovered: Tile | null) {
     this.tiles.forEach((tile) => (tile === hovered ? tile.enter() : tile.leave()));
-    this.events.onLabel(hovered ? hovered.project.title : IDLE_LABEL);
+    if (hovered === this.hovered) return;
+    this.hovered = hovered;
+    this.events.onHover(hovered ? { project: hovered.project, rect: hovered.screenRect } : null);
+  }
+
+  private clearHover() {
+    this.setHovered(null);
   }
 
   private onClick(event: MouseEvent) {
@@ -373,6 +389,7 @@ export class Gallery {
     };
 
     this.tiles.forEach((tile) => tile.move(motion));
+    if (this.hovered) this.events.onHoverMove(this.hovered.screenRect);
     this.renderer.render({ scene: this.scene, camera: this.camera });
     this.frame = window.requestAnimationFrame(this.update);
   }
