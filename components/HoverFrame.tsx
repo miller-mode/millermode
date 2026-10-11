@@ -1,7 +1,7 @@
 import type { Ref } from "react";
 
 type HoverFrameProps = {
-  ref: Ref<SVGSVGElement>;
+  ref?: Ref<SVGSVGElement>;
   className?: string;
 };
 

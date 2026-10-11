@@ -47,3 +47,6 @@ next-env.d.ts
 
 # design references
 /reference/
+
+# impeccable
+/.impeccable/

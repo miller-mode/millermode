@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useMountEffect } from "@/hooks/useMountEffect";
 import { Gallery } from "@/lib/gallery/Gallery";
 import type { HoverTarget } from "@/lib/gallery/Gallery";
@@ -15,6 +16,9 @@ import { Menu } from "./Menu";
 import { ProjectView } from "./ProjectView";
 
 const MOBILE_BREAKPOINT = 768;
+const PROJECT_PATH = "/projects/";
+
+let introPlayed = false;
 
 export function Home({ projects }: { projects: Project[] }) {
   const galleryContainer = useRef<HTMLDivElement>(null);
@@ -23,14 +27,19 @@ export function Home({ projects }: { projects: Project[] }) {
   const cursor = useRef<CursorHandle>(null);
   const hoverFrame = useRef<SVGSVGElement>(null);
   const gallery = useRef<Gallery | null>(null);
+  const openedHere = useRef(false);
+  const pathname = usePathname();
 
   const [revealed, setRevealed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [project, setProject] = useState<Project | null>(null);
+
+  const openSlug = pathname.startsWith(PROJECT_PATH) ? pathname.slice(PROJECT_PATH.length) : null;
+  const project = projects.find((candidate) => candidate.slug === openSlug) ?? null;
 
   const isHome = revealed && !menuOpen && !project;
 
   function reveal() {
+    introPlayed = true;
     setRevealed(true);
     document.documentElement.classList.add("-initialized");
     gallery.current?.start();
@@ -53,15 +62,25 @@ export function Home({ projects }: { projects: Project[] }) {
     gallery.current?.setVisible(true);
   }
 
-  function openProject(next: Project) {
+  function hideGallery() {
     pauseGallery();
     if (window.innerWidth >= MOBILE_BREAKPOINT) gallery.current?.setVisible(false);
+  }
+
+  function openProject(next: Project) {
+    hideGallery();
     setMenuOpen(false);
-    setProject(next);
+    openedHere.current = true;
+    window.history.pushState(null, "", `${PROJECT_PATH}${next.slug}`);
   }
 
   function closeProject() {
-    setProject(null);
+    if (openedHere.current) {
+      openedHere.current = false;
+      window.history.back();
+    } else {
+      window.history.pushState(null, "", "/");
+    }
     if (!menuOpen) resumeGallery();
   }
 
@@ -77,8 +96,8 @@ export function Home({ projects }: { projects: Project[] }) {
 
   function goHome() {
     setMenuOpen(false);
-    setProject(null);
-    resumeGallery();
+    if (project) closeProject();
+    else resumeGallery();
   }
 
   useMountEffect(() => {
@@ -99,7 +118,19 @@ export function Home({ projects }: { projects: Project[] }) {
     });
     gallery.current = instance;
 
+    function syncWithHistory() {
+      if (window.location.pathname.startsWith(PROJECT_PATH)) {
+        hideGallery();
+        return;
+      }
+      openedHere.current = false;
+      resumeGallery();
+    }
+
+    window.addEventListener("popstate", syncWithHistory);
+
     return () => {
+      window.removeEventListener("popstate", syncWithHistory);
       instance.destroy();
       gallery.current = null;
       document.documentElement.classList.remove("-initialized");
@@ -108,7 +139,7 @@ export function Home({ projects }: { projects: Project[] }) {
 
   return (
     <>
-      <Loader progress={loadProgress} ready={galleryReady} onReveal={reveal} />
+      <Loader progress={loadProgress} ready={galleryReady} onReveal={reveal} quick={introPlayed} />
       <main className="t-home">
         <Header menuOpen={menuOpen} onLogo={goHome} onToggle={toggleMenu} />
         <Menu open={menuOpen} />

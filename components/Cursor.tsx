@@ -16,13 +16,14 @@ export type CursorHandle = {
 type CursorProps = {
   ref: Ref<CursorHandle>;
   home: boolean;
+  quiet?: boolean;
 };
 
 function lerp(from: number, to: number, amount: number) {
   return (1 - amount) * from + amount * to;
 }
 
-export function Cursor({ ref, home }: CursorProps) {
+export function Cursor({ ref, home, quiet = false }: CursorProps) {
   const pointer = useRef<HTMLDivElement>(null);
   const label = useRef<HTMLParagraphElement>(null);
 
@@ -62,7 +63,7 @@ export function Cursor({ ref, home }: CursorProps) {
   });
 
   return (
-    <div ref={pointer} className={`a-cursor${home ? " -home" : ""}`} aria-hidden="true">
+    <div ref={pointer} className={`a-cursor${home ? " -home" : ""}${quiet ? " -quiet" : ""}`} aria-hidden="true">
       <Doodle name="dot" className="a-cursor__dot" />
       <p ref={label} className="a-p a-cursor__label">
         {IDLE_LABEL}

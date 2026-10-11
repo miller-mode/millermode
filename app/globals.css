@@ -178,6 +178,11 @@ a:focus-visible {
   mix-blend-mode: color-burn;
 }
 
+::selection {
+  background-color: var(--color-red);
+  color: var(--color-white);
+}
+
 .hide-first {
   opacity: 0;
 }
@@ -185,6 +190,10 @@ a:focus-visible {
 .-initialized .hide-first {
   opacity: 1;
   transition: opacity 1s ease 2s;
+}
+
+.-page .hide-first {
+  transition: opacity 0.4s ease;
 }
 
 .a-h1 {
@@ -453,14 +462,14 @@ a:focus-visible {
   list-style: none;
 }
 
-.o-menu__rule {
+.a-rule {
   display: block;
   width: 100%;
   height: 1.2rem;
   overflow: visible;
 }
 
-.o-menu__rule path {
+.a-rule path {
   fill: none;
   stroke: var(--color-white);
   stroke-width: 1;
@@ -491,6 +500,10 @@ a:focus-visible {
 .o-menu__item:focus-visible .o-menu__label {
   color: var(--color-red);
   transform: translateX(calc(var(--offset, 0) * -100%)) rotate(0deg);
+}
+
+.o-menu__item[aria-current="page"] .o-menu__index {
+  color: var(--color-red);
 }
 
 .o-menu__index {
@@ -569,36 +582,40 @@ a:focus-visible {
   transform: rotate(0deg);
 }
 
-.o-menu__footer {
+.a-signature {
   display: flex;
-  gap: 2rem;
+  flex-wrap: wrap;
+  gap: 1.2rem 2rem;
   align-items: flex-end;
+}
+
+.o-menu__footer {
   padding: 0 2.8rem 2.4rem;
 }
 
-.o-menu__signature {
+.a-signature__mark {
   display: flex;
   gap: 0.6rem;
   align-items: flex-end;
 }
 
-.o-menu__signatureComma {
+.a-signature__comma {
   width: auto;
   height: 1.6rem;
   margin-right: 0.4rem;
 }
 
-.o-menu__signatureDoodle {
+.a-signature__doodle {
   width: auto;
   height: 3.6rem;
 }
 
-.o-menu__email {
+.a-signature__email {
   padding-bottom: 0.6rem;
   transition: color 0.6s ease-in-out;
 }
 
-.o-menu__email:hover {
+.a-signature__email:hover {
   color: var(--color-red);
 }
 
@@ -623,6 +640,71 @@ a:focus-visible {
   outline: none;
 }
 
+.m-project.-standalone {
+  z-index: 1;
+}
+
+.m-project.-standalone .m-project__track {
+  top: 10rem;
+}
+
+.m-project__slide {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: flex-start;
+  height: 100%;
+}
+
+.m-project.-standalone .m-project__sheet {
+  padding-top: 10rem;
+}
+
+.a-cursor.-quiet:not(.-hover) .a-cursor__label {
+  display: none;
+}
+
+.m-project__slide.-link {
+  cursor: pointer;
+}
+
+.m-project__frameName {
+  color: var(--color-white);
+  text-transform: uppercase;
+}
+
+.m-project__panel {
+  flex-direction: column;
+  gap: 2.4rem;
+  justify-content: center;
+  padding: 0 2rem;
+  color: var(--color-white);
+}
+
+.m-project__panelHeading {
+  color: var(--color-red);
+  font-size: 3.2rem;
+  line-height: 1;
+}
+
+.m-project__panelStatement {
+  max-width: 48ch;
+  font-size: 1.4rem;
+  line-height: 1.5;
+}
+
+.m-project__panelColumns {
+  display: flex;
+  gap: 4rem;
+}
+
+.m-project__panelColumn {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  white-space: nowrap;
+}
+
 .m-project__track {
   position: absolute;
   top: 8rem;
@@ -631,10 +713,10 @@ a:focus-visible {
   left: 0;
   display: flex;
   gap: 2rem;
-  align-items: center;
+  align-items: flex-start;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 0 var(--gutter);
+  padding: 2.4rem var(--gutter);
   scrollbar-width: none;
   touch-action: pan-x;
   overscroll-behavior: contain;
@@ -790,7 +872,9 @@ a:focus-visible {
 
 .m-project__category {
   overflow: hidden;
-  text-transform: uppercase;
+  color: var(--color-red);
+  font-size: 2.4rem;
+  line-height: 1.1;
 }
 
 .m-project__category span {
@@ -825,7 +909,7 @@ a:focus-visible {
     scroll-snap-type: x mandatory;
   }
 
-  .m-project__image {
+  .m-project__slide {
     scroll-snap-align: center;
   }
 }
@@ -847,11 +931,34 @@ a:focus-visible {
 }
 
 @media only screen and (min-width: 1025px) {
+
   .m-project__track {
     top: 6rem;
     bottom: 16rem;
     gap: 3rem;
-    padding: 0 6rem;
+    align-items: center;
+    padding: 2.4rem 6rem;
+  }
+
+  .m-project.-standalone .m-project__track {
+    top: 13.6rem;
+    bottom: 13.6rem;
+  }
+
+  .m-project__slide {
+    align-items: center;
+  }
+
+  .m-project__slide.m-project__panel {
+    align-items: flex-start;
+  }
+
+  .m-project.-standalone .m-project__sheet {
+    padding-top: 16rem;
+  }
+
+  .m-project.-hovering .m-project__slide.-link {
+    cursor: none;
   }
 
   .m-project__image {
@@ -868,6 +975,47 @@ a:focus-visible {
     right: 6rem;
     bottom: 6rem;
     left: 6rem;
+  }
+}
+
+.t-page {
+  height: 100%;
+}
+
+.m-notFound {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1.6rem;
+  padding: 12rem var(--gutter);
+}
+
+.m-notFound__doodle {
+  width: auto;
+  height: 14rem;
+  margin-bottom: 2rem;
+  transform: rotate(-6deg);
+}
+
+.m-notFound__note {
+  color: var(--color-red);
+  font-size: 3.2rem;
+}
+
+.m-notFound__home {
+  text-decoration: underline;
+  text-underline-offset: 0.4em;
+}
+
+.m-notFound__home:hover {
+  color: var(--color-red);
+}
+
+@media only screen and (min-width: 1025px) {
+
+  .m-notFound {
+    padding: 14rem 6rem;
   }
 }
 

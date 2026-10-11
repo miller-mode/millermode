@@ -7,20 +7,21 @@ import { useMountEffect } from "@/hooks/useMountEffect";
 import { Doodle } from "./Doodle";
 
 const DRAW_SECONDS = 2.6;
-const DRAW_RATE = 100 / DRAW_SECONDS;
+const RETURN_DRAW_SECONDS = 0.7;
 const WAITING_CEILING = 99;
 
 type LoaderProps = {
   progress: RefObject<number>;
   ready: RefObject<boolean>;
   onReveal: () => void;
+  quick: boolean;
 };
 
 function pad(value: number) {
   return String(value).padStart(3, "0");
 }
 
-export function Loader({ progress, ready, onReveal }: LoaderProps) {
+export function Loader({ progress, ready, onReveal, quick }: LoaderProps) {
   const root = useRef<HTMLDivElement>(null);
 
   useMountEffect(() => {
@@ -28,6 +29,7 @@ export function Loader({ progress, ready, onReveal }: LoaderProps) {
     const counter = scope?.querySelector(".a-loader__count");
     if (!scope || !counter) return;
 
+    const drawRate = 100 / (quick ? RETURN_DRAW_SECONDS : DRAW_SECONDS);
     let drawn = 0;
     let exit: gsap.core.Timeline | null = null;
 
@@ -56,7 +58,7 @@ export function Loader({ progress, ready, onReveal }: LoaderProps) {
 
     function tick(_time: number, deltaMs: number) {
       const target = ready.current ? 100 : Math.min(progress.current, WAITING_CEILING);
-      drawn = Math.max(drawn, Math.min(target, drawn + (DRAW_RATE * deltaMs) / 1000));
+      drawn = Math.max(drawn, Math.min(target, drawn + (drawRate * deltaMs) / 1000));
       render();
 
       if (drawn < 100) return;

@@ -4,12 +4,14 @@ import { useRef } from "react";
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import type { DoodleName } from "@/lib/doodles";
 import type { ProjectImage } from "@/lib/projects";
-import { site } from "@/lib/site";
 import { Doodle } from "./Doodle";
+import { Rule } from "./Rule";
+import { Signature } from "./Signature";
 
 gsap.registerPlugin(useGSAP);
 
@@ -29,7 +31,7 @@ const ITEMS: MenuItem[] = [
     doodle: "pentagram",
     offset: 0,
     tilt: -2,
-    peek: { src: "/projects/vienna-state-ballet-vogue-portugal/01.jpg", width: 850, height: 1062 },
+    peek: { src: "/images/projects/vienna-state-ballet-vogue-portugal/01.jpg", width: 850, height: 1062 },
   },
   {
     href: "/costume-design",
@@ -37,7 +39,7 @@ const ITEMS: MenuItem[] = [
     doodle: "devil",
     offset: 0.35,
     tilt: 1.5,
-    peek: { src: "/projects/fan-letter-short-film/01.jpg", width: 200, height: 113 },
+    peek: { src: "/images/projects/fan-letter-short-film/01.jpg", width: 200, height: 113 },
   },
   {
     href: "/red-carpet",
@@ -45,7 +47,7 @@ const ITEMS: MenuItem[] = [
     doodle: "hearts",
     offset: 1,
     tilt: -1,
-    peek: { src: "/projects/red-carpet-personal-appearances/01.jpg", width: 850, height: 549 },
+    peek: { src: "/images/projects/red-carpet-personal-appearances/01.jpg", width: 850, height: 549 },
   },
   {
     href: "/bio",
@@ -56,33 +58,6 @@ const ITEMS: MenuItem[] = [
     peek: { src: "/bio/michael-miller.jpg", width: 850, height: 1063 },
   },
 ];
-
-const RULE_WIDTH = 1000;
-const RULE_STEP = 40;
-
-function wobblePath(seed: number) {
-  const points = Array.from({ length: RULE_WIDTH / RULE_STEP + 1 }, (_, index) => {
-    const x = index * RULE_STEP;
-    const y = 6 + Math.sin(index * 0.9 + seed * 2.3) * 1.6 + Math.sin(index * 0.37 + seed) * 2.2;
-    return { x, y };
-  });
-
-  return points.reduce((path, point, index) => {
-    if (index === 0) return `M${point.x} ${point.y.toFixed(2)}`;
-    const previous = points[index - 1];
-    const midX = (previous.x + point.x) / 2;
-    const midY = ((previous.y + point.y) / 2).toFixed(2);
-    return `${path} Q${previous.x} ${previous.y.toFixed(2)} ${midX} ${midY}`;
-  }, "");
-}
-
-function Rule({ seed }: { seed: number }) {
-  return (
-    <svg className="o-menu__rule" viewBox={`0 0 ${RULE_WIDTH} 12`} preserveAspectRatio="none" aria-hidden="true">
-      <path pathLength={1} d={wobblePath(seed)} />
-    </svg>
-  );
-}
 
 function pad(value: number) {
   return String(value).padStart(2, "0");
@@ -95,6 +70,7 @@ type MenuProps = {
 export function Menu({ open }: MenuProps) {
   const root = useRef<HTMLDivElement>(null);
   const hasOpened = useRef(false);
+  const pathname = usePathname();
 
   useGSAP(
     () => {
@@ -120,7 +96,7 @@ export function Menu({ open }: MenuProps) {
       hasOpened.current = true;
       timeline
         .fromTo(
-          ".o-menu__rule path",
+          ".a-rule path",
           { strokeDashoffset: 1 },
           { strokeDashoffset: 0, duration: 0.9, ease: "power2.out", stagger: 0.08 },
           "-=0.2",
@@ -145,7 +121,7 @@ export function Menu({ open }: MenuProps) {
               <li key={href}>
                 <Link
                   href={href}
-                  prefetch={false}
+                  aria-current={pathname === href ? "page" : undefined}
                   className="a-display o-menu__item o-menu__reveal"
                   style={{ "--offset": offset, "--tilt": `${tilt}deg` } as CSSProperties}
                 >
@@ -166,16 +142,7 @@ export function Menu({ open }: MenuProps) {
           </ul>
         </nav>
 
-        <footer className="o-menu__footer o-menu__reveal">
-          <p className="o-menu__signature">
-            <Doodle name="monogram" className="o-menu__signatureDoodle" />
-            <Doodle name="comma" className="o-menu__signatureComma" />
-            <Doodle name="xxx" className="o-menu__signatureDoodle" />
-          </p>
-          <a className="a-label o-menu__email" href={`mailto:${site.email}`}>
-            {site.email}
-          </a>
-        </footer>
+        <Signature className="o-menu__footer o-menu__reveal" />
       </div>
 
     </div>

@@ -65,3 +65,10 @@ export function hideFrame(frame: SVGSVGElement) {
   gsap.killTweensOf(frame);
   gsap.to(frame, { opacity: 0, duration: 0.2, ease: "power1.out" });
 }
+
+export function drawFrameAround(frame: SVGSVGElement, target: Element) {
+  const bounds = frame.parentElement?.getBoundingClientRect();
+  const box = target.getBoundingClientRect();
+  if (!bounds || box.width === 0) return;
+  drawFrame(frame, { x: box.left - bounds.left, y: box.top - bounds.top, width: box.width, height: box.height });
+}

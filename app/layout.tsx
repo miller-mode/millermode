@@ -16,7 +16,11 @@ const hand = Caveat({
 });
 
 export const metadata: Metadata = {
-  title: `${site.name} — ${site.fullName}, ${site.role}`,
+  metadataBase: new URL("https://millermode.com"),
+  title: {
+    default: `${site.name} — ${site.fullName}, ${site.role}`,
+    template: `%s — ${site.fullName}, ${site.role}`,
+  },
   description: site.description,
   icons: { icon: "/logo.svg" },
   openGraph: {
