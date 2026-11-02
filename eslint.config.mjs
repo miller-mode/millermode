@@ -11,7 +11,7 @@ const eslintConfig = defineConfig([
       "react-hooks/exhaustive-deps": "off",
     },
   },
-  globalIgnores([".next/**", "out/**", "build/**", ".open-next/**", ".wrangler/**", "next-env.d.ts", "reference/**"]),
+  globalIgnores([".next/**", "out/**", "build/**", ".wrangler/**", "next-env.d.ts", "reference/**"]),
 ]);
 
 export default eslintConfig;

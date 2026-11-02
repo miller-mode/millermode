@@ -5,16 +5,14 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "wrangler dev",
     "lint": "eslint",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "preview": "next build && wrangler dev",
+    "deploy": "next build && wrangler deploy",
+    "upload": "next build && wrangler versions upload"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
-    "@opennextjs/cloudflare": "^1.20.6",
     "gsap": "^3.15.0",
     "next": "16.3.6",
     "ogl": "^1.0.11",
